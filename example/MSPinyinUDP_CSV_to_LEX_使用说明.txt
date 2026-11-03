@@ -1,0 +1,73 @@
+﻿ChsPinyinUDP CSV → LEX 使用说明
+================================
+
+一、为什么不能直接用之前的 Emoji CSV？
+-------------------------------------
+之前的 ChsPinyinUDP_emoji_mappings.csv 只有 Emoji 子集（1386 条）。
+原始 ChsPinyinUDP.lex 有 3099 条记录，还包括符号、颜文字、缩写、日期模板等。
+若只用 Emoji 子集重建，其他记录都会消失。
+
+因此应使用：
+  ChsPinyinUDP_full_roundtrip.csv
+
+二、推荐工作流
+--------------
+1. 备份原始：
+   C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex
+
+2. 用 Excel 打开 ChsPinyinUDP_full_roundtrip.csv。
+   修改 py、text、candidate_slot。
+   添加新 Emoji 时，建议 candidate_slot=5。
+
+3. 保存时必须选择：
+   CSV UTF-8 (逗号分隔) (*.csv)
+
+4. 转回 LEX：
+   python MSPinyinUDP_CSV_to_LEX.py ^
+     --csv ChsPinyinUDP_full_roundtrip.csv ^
+     --template ChsPinyinUDP.lex ^
+     --output ChsPinyinUDP.modified.lex
+
+三、CSV 列
+---------
+index
+  仅供阅读/排序。转换器不依赖它。
+
+py
+  输入码/拼音，例如 shuitong。
+
+text
+  输出候选，例如 🪣。
+
+candidate_slot
+  候选位置。常见 Emoji 为 5。
+  注意：原文件也存在大于 9 的内部特殊值，不要随便改已有行。
+
+record_magic
+  每条记录的 32 位标记。原文件中均为 0x00100010（十进制 1048592）。
+
+flags_byte
+  未公开字段。你的文件中均为 0x13（十进制 19）。
+
+type_id
+  未公开的候选类型/类别字段。
+  你的文件范围为 1..9。
+  新增 Emoji 默认建议使用 6。
+
+record_timestamp
+  记录内部时间/版本字段。
+  你的文件所有现有记录值相同。新增行留空时转换器继承模板中的常用值。
+
+四、注意
+--------
+- 转换器只生成一个新的 .lex，不会覆盖系统文件。
+- 微软没有公开保证 ChsPinyinUDP.lex 是稳定 API。
+- Windows Resource Protection / 系统更新可能恢复系统文件。
+- 直接替换 C:\Windows\InputMethod\CHS 下的系统资源有风险。
+- 如果目的只是补 Emoji，优先使用“用户定义短语”导入 DAT 更安全。
+
+五、未修改往返验证
+-----------------
+本工具已用你上传的原始 ChsPinyinUDP.lex 测试：
+原始 LEX → 完整 CSV → 重建 LEX
+在 CSV 未修改的情况下，目标是逐字节一致。

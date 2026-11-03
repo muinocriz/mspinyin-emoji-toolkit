@@ -1,0 +1,23 @@
+1. lex 到 csv
+python MSPinyinUDP_LEX_to_CSV.py  --input ./ChsPinyinUDP.lex  --output ./ChsPinyinUDP_full_roundtrip.csv
+
+2. 修改 ChsPinyinUDP_full_roundtrip.csv，在文本最后添加即可
+
+3. csv 到 lex
+python MSPinyinUDP_CSV_to_LEX_v3.py  --csv ./ChsPinyinUDP_full_roundtrip.csv  --template ./ChsPinyinUDP.lex  --output ./ChsPinyinUDP.modified.lex
+
+4. 开启管理员终端
+4.1 切换到英文输入法，关闭中文输入法
+taskkill /F /IM ChsIME.exe
+4.2 获取权限
+takeown /F "C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex" /A
+
+icacls "C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex" /grant *S-1-5-32-544:F
+
+4.3 复制文件
+Copy-Item "C:\Users\lenovo\Downloads\emoji-update\ChsPinyinUDP.modified.lex" "C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex" -Force
+
+4.4 恢复权限
+icacls "C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex" /remove:g *S-1-5-32-544
+
+icacls "C:\Windows\InputMethod\CHS\ChsPinyinUDP.lex" /setowner "NT SERVICE\TrustedInstaller"
