@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'data/roundtrip_b64_parts/chunk_005.b64'
+      - 'data/roundtrip_b64_parts/chunk_005b.b64'
 
 permissions:
   contents: write
@@ -14,11 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Decode exact CSV
+      - name: Decode and verify exact CSV
         shell: bash
         run: |
           cat data/roundtrip_b64_parts/chunk_*.b64 | base64 -d | gzip -d > data/ChsPinyinUDP_full_roundtrip.csv
           test "$(wc -l < data/ChsPinyinUDP_full_roundtrip.csv)" -eq 3100
+          echo "ef0bfb8affa8bcc975f7d9abd36d64e85c558691c9ba9df59f36afeddab79622  data/ChsPinyinUDP_full_roundtrip.csv" | sha256sum -c -
       - name: Commit final data and remove temporary assembly files
         shell: bash
         run: |
