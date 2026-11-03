@@ -1,0 +1,30 @@
+name: Assemble roundtrip CSV
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'data/full_roundtrip_parts/part_007.csv'
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble exact CSV
+        shell: bash
+        run: |
+          cat data/full_roundtrip_parts/part_*.csv > data/ChsPinyinUDP_full_roundtrip.csv
+          test "$(wc -l < data/ChsPinyinUDP_full_roundtrip.csv)" -eq 3100
+      - name: Replace temporary parts with assembled file
+        shell: bash
+        run: |
+          rm -rf data/full_roundtrip_parts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data
+          git commit -m "Assemble full roundtrip CSV"
+          git push
